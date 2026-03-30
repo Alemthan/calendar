@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Alemthan Property Management Monthly Calendar</title>
+    <title>Alemthan Property Management - Interactive Calendar</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); min-height: 100vh; padding: 15px; }
@@ -28,21 +28,43 @@
         .day-cell.today { background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%); border: 2px solid #ffc107; }
         .day-number { font-weight: bold; font-size: 16px; color: #495057; margin-bottom: 5px; text-align: center; }
         .day-cell.other-month .day-number { color: #adb5bd; }
-        .task { background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%); border-left: 3px solid #2196f3; padding: 3px 6px; margin: 2px 0; border-radius: 4px; font-size: 9px; line-height: 1.2; cursor: pointer; transition: all 0.2s ease; word-wrap: break-word; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-        .task:hover { transform: scale(1.05); box-shadow: 0 2px 8px rgba(0,0,0,0.15); white-space: normal; z-index: 10; position: relative; }
+        .task { background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%); border-left: 3px solid #2196f3; padding: 3px 6px; margin: 2px 0; border-radius: 4px; font-size: 9px; line-height: 1.2; cursor: pointer; transition: all 0.2s ease; word-wrap: break-word; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; position: relative; }
+        .task:hover { transform: scale(1.05); box-shadow: 0 2px 8px rgba(0,0,0,0.15); white-space: normal; z-index: 10; }
         .task.critical { background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%); border-color: #f44336; font-weight: 700; }
         .task.high { background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%); border-color: #ff9800; font-weight: 600; }
         .task.medium { background: linear-gradient(135deg, #f3e5f5 0%, #e1bee7 100%); border-color: #9c27b0; }
         .task.maintenance { background: linear-gradient(135deg, #e8f5e8 0%, #c8e6c9 100%); border-color: #4caf50; }
         .task.finance { background: linear-gradient(135deg, #fff8e1 0%, #ffecb3 100%); border-color: #ffc107; }
         .task.inspection { background: linear-gradient(135deg, #e1f5fe 0%, #b3e5fc 100%); border-color: #03a9f4; }
+        .task.status-done { opacity: 0.5; text-decoration: line-through; background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%) !important; }
+        .task.status-in-progress { border-left-width: 5px; animation: pulse 2s infinite; }
+        .task.status-waiting { opacity: 0.7; border-style: dashed; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
+        .task-status-badge { position: absolute; top: 1px; right: 1px; font-size: 7px; padding: 1px 3px; border-radius: 3px; background: #28a745; color: white; font-weight: bold; }
+        .task.status-in-progress .task-status-badge { background: #ffc107; color: #000; }
+        .task.status-waiting .task-status-badge { background: #6c757d; }
         .weekend-message { background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border: 2px solid #6c757d; padding: 8px; margin: 5px 0; border-radius: 6px; text-align: center; font-size: 10px; font-weight: bold; color: #495057; }
         .weekend-message.emergency { background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%); border-color: #dc3545; color: #721c24; }
         .weekend-message.showings { background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%); border-color: #ff9800; color: #e65100; }
+        .context-menu { position: fixed; background: white; border: 2px solid #dee2e6; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.2); padding: 5px 0; z-index: 1000; display: none; min-width: 180px; }
+        .context-menu-item { padding: 10px 15px; cursor: pointer; font-size: 13px; transition: background 0.2s; display: flex; align-items: center; gap: 8px; }
+        .context-menu-item:hover { background: #f8f9fa; }
+        .context-menu-item.active { background: #e7f3ff; font-weight: 600; }
         .legend { display: flex; justify-content: center; gap: 15px; padding: 15px; background: #f8f9fa; border-top: 1px solid #e9ecef; flex-wrap: wrap; }
         .legend-item { display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 600; padding: 6px 12px; background: white; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
         .legend-color { width: 12px; height: 12px; border-radius: 3px; border: 2px solid; }
         .task-count { position: absolute; top: 2px; right: 2px; background: #6c757d; color: white; border-radius: 50%; width: 16px; height: 16px; font-size: 8px; display: flex; align-items: center; justify-content: center; font-weight: bold; }
+        .modal { display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); }
+        .modal-content { background-color: white; margin: 10% auto; padding: 30px; border-radius: 15px; width: 90%; max-width: 500px; box-shadow: 0 25px 50px rgba(0,0,0,0.3); }
+        .modal-header { font-size: 1.5em; font-weight: 600; margin-bottom: 20px; color: #2c3e50; }
+        .modal-body textarea { width: 100%; min-height: 100px; padding: 10px; border: 2px solid #dee2e6; border-radius: 8px; font-family: inherit; font-size: 14px; }
+        .modal-footer { margin-top: 20px; display: flex; gap: 10px; justify-content: flex-end; }
+        .close-modal { color: #aaa; float: right; font-size: 28px; font-weight: bold; cursor: pointer; line-height: 20px; }
+        .close-modal:hover { color: #000; }
+        .stats-bar { background: #343a40; color: white; padding: 15px 30px; display: flex; justify-content: space-around; flex-wrap: wrap; gap: 20px; }
+        .stat-item { text-align: center; }
+        .stat-value { font-size: 2em; font-weight: 700; color: #28a745; }
+        .stat-label { font-size: 0.9em; opacity: 0.9; text-transform: uppercase; letter-spacing: 1px; }
         @media (max-width: 1200px) { .task { font-size: 8px; } .day-cell { min-height: 120px; } }
         @media (max-width: 768px) { .calendar-grid { gap: 1px; } .day-cell { min-height: 100px; padding: 4px; } .task { font-size: 7px; padding: 2px 4px; } .controls { flex-direction: column; align-items: stretch; } }
     </style>
@@ -51,7 +73,25 @@
     <div class="container">
         <div class="header">
             <h1>📋 Alemthan Property Management</h1>
-            <p>Monthly Task Calendar - Full Month View</p>
+            <p>Interactive Monthly Task Calendar - Click tasks to update status!</p>
+        </div>
+        <div class="stats-bar">
+            <div class="stat-item">
+                <div class="stat-value" id="statTotal">0</div>
+                <div class="stat-label">Total Tasks</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="statDone" style="color: #28a745;">0</div>
+                <div class="stat-label">Completed</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="statInProgress" style="color: #ffc107;">0</div>
+                <div class="stat-label">In Progress</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="statPending" style="color: #6c757d;">0</div>
+                <div class="stat-label">To Do</div>
+            </div>
         </div>
         <div class="controls">
             <div class="month-selector">
@@ -69,11 +109,32 @@
             <div class="calendar-grid" id="calendar"></div>
         </div>
         <div class="legend">
+            <div class="legend-item"><div class="legend-color" style="background: #d4edda; border-color: #28a745;"></div><span>✅ Done</span></div>
             <div class="legend-item"><div class="legend-color critical" style="background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%); border-color: #f44336;"></div><span>🚨 Critical</span></div>
             <div class="legend-item"><div class="legend-color high" style="background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%); border-color: #ff9800;"></div><span>⚡ High Priority</span></div>
             <div class="legend-item"><div class="legend-color maintenance" style="background: linear-gradient(135deg, #e8f5e8 0%, #c8e6c9 100%); border-color: #4caf50;"></div><span>🔧 Maintenance</span></div>
             <div class="legend-item"><div class="legend-color finance" style="background: linear-gradient(135deg, #fff8e1 0%, #ffecb3 100%); border-color: #ffc107;"></div><span>💰 Finance</span></div>
-            <div class="legend-item"><div class="legend-color inspection" style="background: linear-gradient(135deg, #e1f5fe 0%, #b3e5fc 100%); border-color: #03a9f4;"></div><span>🔍 Inspections</span></div>
+        </div>
+    </div>
+    <div id="contextMenu" class="context-menu">
+        <div class="context-menu-item" onclick="setTaskStatus('todo')">📋 To Do</div>
+        <div class="context-menu-item" onclick="setTaskStatus('in-progress')">🔄 In Progress</div>
+        <div class="context-menu-item" onclick="setTaskStatus('waiting')">⏸️ Waiting</div>
+        <div class="context-menu-item" onclick="setTaskStatus('done')">✅ Done</div>
+        <hr style="margin: 5px 0;">
+        <div class="context-menu-item" onclick="addTaskNote()">📝 Add Note</div>
+    </div>
+    <div id="noteModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeNoteModal()">&times;</span>
+            <div class="modal-header">📝 Add Note to Task</div>
+            <div class="modal-body">
+                <textarea id="taskNoteInput" placeholder="Enter notes, proof links, or additional details..."></textarea>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" onclick="saveTaskNote()">Save Note</button>
+                <button class="btn btn-secondary" onclick="closeNoteModal()">Cancel</button>
+            </div>
         </div>
     </div>
     <script>
@@ -87,18 +148,34 @@
             5: { "8:00 AM": [{ text: "📋 Check To-Do File", type: "critical" }, { text: "Week Final Check", type: "critical" }, { text: "🔧 Update Work Orders", type: "maintenance" }], "9:00 AM": [{ text: "Weekend Maintenance Prep", type: "maintenance" }, { text: "🌿 Water Outside Plants", type: "maintenance" }], "10:00 AM": [{ text: "Weekly Performance Review", type: "high" }, { text: "💰 Enter Rents QB (1st)", type: "finance", firstWeekOnly: true }], "2:00 PM": [{ text: "📧 Clean Emails", type: "medium" }, { text: "📁 File Documents", type: "medium" }, { text: "🧹 Clean Offices", type: "maintenance" }], "3:00 PM": [{ text: "Owner Communications", type: "medium" }, { text: "Weekly Reports", type: "finance" }] }
         };
         let currentDate = new Date();
+        let taskStates = JSON.parse(localStorage.getItem('alemthanTaskStates') || '{}');
+        let currentTaskId = null;
+        function generateTaskId(date, text) { return `${date.toISOString().split('T')[0]}_${text.replace(/[^a-zA-Z0-9]/g, '_')}`; }
+        function saveTaskStates() { localStorage.setItem('alemthanTaskStates', JSON.stringify(taskStates)); updateStats(); }
         function formatMonthInput(date) { const year = date.getFullYear(); const month = (date.getMonth() + 1).toString().padStart(2, '0'); return `${year}-${month}`; }
         function isToday(date) { const today = new Date(); return date.toDateString() === today.toDateString(); }
         function isFirstWeekOfMonth(date) { return Math.ceil(date.getDate() / 7) === 1; }
         function isFirstWednesday(date) { return date.getDay() === 3 && isFirstWeekOfMonth(date); }
         function isSameMonth(date1, date2) { return date1.getFullYear() === date2.getFullYear() && date1.getMonth() === date2.getMonth(); }
         function updateMonthDisplay() { document.getElementById('monthDate').value = formatMonthInput(currentDate); document.getElementById('currentMonth').textContent = `${monthNames[currentDate.getMonth()]} ${currentDate.getFullYear()}`; }
+        function updateStats() {
+            let total = 0, done = 0, inProgress = 0, pending = 0;
+            Object.values(taskStates).forEach(state => {
+                total++;
+                if (state.status === 'done') done++;
+                else if (state.status === 'in-progress') inProgress++;
+                else pending++;
+            });
+            document.getElementById('statTotal').textContent = total;
+            document.getElementById('statDone').textContent = done;
+            document.getElementById('statInProgress').textContent = inProgress;
+            document.getElementById('statPending').textContent = pending;
+        }
         function generateCalendar() {
             const calendar = document.getElementById('calendar');
             calendar.innerHTML = '';
             dayNames.forEach(day => { const dayHeader = document.createElement('div'); dayHeader.className = 'day-header'; dayHeader.textContent = day; calendar.appendChild(dayHeader); });
             const firstDay = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
-            const lastDay = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
             const startDate = new Date(firstDay);
             startDate.setDate(startDate.getDate() - firstDay.getDay());
             for (let i = 0; i < 42; i++) {
@@ -118,28 +195,95 @@
                     if (dayOfWeek === 0) { const weekendMsg = document.createElement('div'); weekendMsg.className = 'weekend-message emergency'; weekendMsg.innerHTML = '🚨 EMERGENCY ONLY'; dayCell.appendChild(weekendMsg); }
                     else if (dayOfWeek === 6) { const weekendMsg = document.createElement('div'); weekendMsg.className = 'weekend-message showings'; weekendMsg.innerHTML = '🏠 SHOWINGS'; dayCell.appendChild(weekendMsg); }
                     else {
-                        if (date.getDate() === 4) { const lateNotice = document.createElement('div'); lateNotice.className = 'task critical'; lateNotice.textContent = '📋 Send Late Notices'; lateNotice.title = 'Send Late Notices (4th of month)'; dayCell.appendChild(lateNotice); taskCount++; const lateCharges = document.createElement('div'); lateCharges.className = 'task finance'; lateCharges.textContent = '💰 Post Late Charges'; lateCharges.title = 'Post Late Charges (4th of month)'; dayCell.appendChild(lateCharges); taskCount++; }
+                        if (date.getDate() === 4) { 
+                            dayCell.appendChild(createTaskElement(date, { text: '📋 Send Late Notices', type: 'critical' })); taskCount++;
+                            dayCell.appendChild(createTaskElement(date, { text: '💰 Post Late Charges', type: 'finance' })); taskCount++;
+                        }
                         const weekOfMonth = Math.ceil(date.getDate() / 7);
-                        if (weekOfMonth === 2 && dayOfWeek === 1) { const loanPayments = document.createElement('div'); loanPayments.className = 'task finance'; loanPayments.textContent = '🏦 Pay Loan Payments'; loanPayments.title = 'Pay All Loan Payments (Second week)'; dayCell.appendChild(loanPayments); taskCount++; }
-                        if (weekOfMonth === 3 && dayOfWeek === 1) { const inspections = document.createElement('div'); inspections.className = 'task inspection'; inspections.textContent = '🔍 Schedule Inspections'; inspections.title = 'Schedule Bi-Annual Inspections (Third week)'; dayCell.appendChild(inspections); taskCount++; }
+                        if (weekOfMonth === 2 && dayOfWeek === 1) { dayCell.appendChild(createTaskElement(date, { text: '🏦 Pay Loan Payments', type: 'finance' })); taskCount++; }
+                        if (weekOfMonth === 3 && dayOfWeek === 1) { dayCell.appendChild(createTaskElement(date, { text: '🔍 Schedule Inspections', type: 'inspection' })); taskCount++; }
                         const month = date.getMonth() + 1;
                         const isQuarterMonth = [3, 6, 9, 12].includes(month);
-                        if (date.getDate() === 20 && isQuarterMonth) { const payouts = document.createElement('div'); payouts.className = 'task critical'; payouts.textContent = '💼 Investor Payouts Due 25th'; payouts.title = 'Complete Investor Payouts by 25th (Quarterly)'; dayCell.appendChild(payouts); taskCount++; }
+                        if (date.getDate() === 20 && isQuarterMonth) { dayCell.appendChild(createTaskElement(date, { text: '💼 Investor Payouts Due 25th', type: 'critical' })); taskCount++; }
                         const dayTasks = dailyTasks[dayOfWeek] || {};
-                        Object.keys(dayTasks).forEach(time => { dayTasks[time].forEach(task => { let shouldShow = true; if (task.firstWeekOnly && !isFirstWeekOfMonth(date)) { shouldShow = false; } if (task.firstWedOnly && !isFirstWednesday(date)) { shouldShow = false; } if (shouldShow) { const taskElement = document.createElement('div'); taskElement.className = `task ${task.type}`; taskElement.textContent = task.text; taskElement.title = `${time}: ${task.text}`; dayCell.appendChild(taskElement); taskCount++; } }); });
+                        Object.keys(dayTasks).forEach(time => { dayTasks[time].forEach(task => { let shouldShow = true; if (task.firstWeekOnly && !isFirstWeekOfMonth(date)) shouldShow = false; if (task.firstWedOnly && !isFirstWednesday(date)) shouldShow = false; if (shouldShow) { dayCell.appendChild(createTaskElement(date, task)); taskCount++; } }); });
                     }
-                    if (taskCount > 5) { const countIndicator = document.createElement('div'); countIndicator.className = 'task-count'; countIndicator.textContent = taskCount; countIndicator.title = `${taskCount} tasks today`; dayCell.appendChild(countIndicator); }
+                    if (taskCount > 5) { const countIndicator = document.createElement('div'); countIndicator.className = 'task-count'; countIndicator.textContent = taskCount; dayCell.appendChild(countIndicator); }
                 }
                 calendar.appendChild(dayCell);
             }
+            updateStats();
         }
+        function createTaskElement(date, task) {
+            const taskElement = document.createElement('div');
+            const taskId = generateTaskId(date, task.text);
+            taskElement.className = `task ${task.type}`;
+            taskElement.textContent = task.text;
+            taskElement.setAttribute('data-task-id', taskId);
+            const state = taskStates[taskId] || { status: 'todo' };
+            if (state.status) { taskElement.classList.add(`status-${state.status}`); }
+            if (state.status && state.status !== 'todo') {
+                const badge = document.createElement('span');
+                badge.className = 'task-status-badge';
+                badge.textContent = state.status === 'done' ? '✓' : state.status === 'in-progress' ? '●' : '⏸';
+                taskElement.appendChild(badge);
+            }
+            taskElement.addEventListener('click', (e) => { e.preventDefault(); toggleTaskDone(taskId, taskElement); });
+            taskElement.addEventListener('contextmenu', (e) => { e.preventDefault(); showContextMenu(e, taskId); });
+            if (state.note) { taskElement.title = `${task.text}\n\nNote: ${state.note}`; }
+            return taskElement;
+        }
+        function toggleTaskDone(taskId, element) {
+            if (!taskStates[taskId]) taskStates[taskId] = { status: 'todo' };
+            taskStates[taskId].status = taskStates[taskId].status === 'done' ? 'todo' : 'done';
+            saveTaskStates();
+            generateCalendar();
+        }
+        function showContextMenu(e, taskId) {
+            currentTaskId = taskId;
+            const menu = document.getElementById('contextMenu');
+            menu.style.display = 'block';
+            menu.style.left = e.pageX + 'px';
+            menu.style.top = e.pageY + 'px';
+            const items = menu.querySelectorAll('.context-menu-item');
+            items.forEach(item => item.classList.remove('active'));
+            const currentStatus = (taskStates[taskId] || {}).status || 'todo';
+            if (currentStatus === 'todo') items[0].classList.add('active');
+            else if (currentStatus === 'in-progress') items[1].classList.add('active');
+            else if (currentStatus === 'waiting') items[2].classList.add('active');
+            else if (currentStatus === 'done') items[3].classList.add('active');
+        }
+        function setTaskStatus(status) {
+            if (!currentTaskId) return;
+            if (!taskStates[currentTaskId]) taskStates[currentTaskId] = {};
+            taskStates[currentTaskId].status = status;
+            saveTaskStates();
+            generateCalendar();
+            document.getElementById('contextMenu').style.display = 'none';
+        }
+        function addTaskNote() {
+            document.getElementById('contextMenu').style.display = 'none';
+            const note = (taskStates[currentTaskId] || {}).note || '';
+            document.getElementById('taskNoteInput').value = note;
+            document.getElementById('noteModal').style.display = 'block';
+        }
+        function saveTaskNote() {
+            if (!currentTaskId) return;
+            if (!taskStates[currentTaskId]) taskStates[currentTaskId] = { status: 'todo' };
+            taskStates[currentTaskId].note = document.getElementById('taskNoteInput').value;
+            saveTaskStates();
+            generateCalendar();
+            closeNoteModal();
+        }
+        function closeNoteModal() { document.getElementById('noteModal').style.display = 'none'; }
+        document.addEventListener('click', () => { document.getElementById('contextMenu').style.display = 'none'; });
         function previousMonth() { currentDate.setMonth(currentDate.getMonth() - 1); updateMonthDisplay(); generateCalendar(); }
         function nextMonth() { currentDate.setMonth(currentDate.getMonth() + 1); updateMonthDisplay(); generateCalendar(); }
         function resetToToday() { currentDate = new Date(); updateMonthDisplay(); generateCalendar(); }
         document.getElementById('monthDate').addEventListener('change', function(e) { const [year, month] = e.target.value.split('-'); currentDate = new Date(parseInt(year), parseInt(month) - 1, 1); updateMonthDisplay(); generateCalendar(); });
         updateMonthDisplay();
         generateCalendar();
-        console.log('📅 Alemthan Property Management Monthly Calendar Loaded Successfully!');
+        console.log('📅 Alemthan Interactive Calendar Loaded!');
     </script>
 </body>
 </html>
