@@ -20,6 +20,7 @@
         .btn-primary:hover { background: #0056b3; transform: translateY(-2px); }
         .btn-success { background: #28a745; color: white; }
         .btn-success:hover { background: #1e7e34; transform: translateY(-2px); }
+        .btn-secondary { background: #6c757d; color: white; }
         .calendar-container { background: white; padding: 20px; }
         .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; background: #e9ecef; border: 2px solid #dee2e6; border-radius: 10px; overflow: hidden; }
         .day-header { background: linear-gradient(135deg, #495057 0%, #6c757d 100%); color: white; padding: 12px; text-align: center; font-weight: 700; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; }
@@ -140,22 +141,137 @@
     <script>
         const dayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
         const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+        
         const dailyTasks = {
-            1: { "8:00 AM": [{ text: "📋 Check To-Do File", type: "critical" }, { text: "Rentec Login & Review", type: "critical" }, { text: "🔧 Update Work Orders", type: "maintenance" }], "9:00 AM": [{ text: "Maintenance Dispatch", type: "maintenance" }, { text: "Follow-up Work Orders", type: "maintenance" }], "10:00 AM": [{ text: "Rent Collection Review", type: "finance" }, { text: "💰 Enter Rents QB (1st Week)", type: "finance", firstWeekOnly: true }], "11:00 AM": [{ text: "📊 Print CNB Statements (1st)", type: "finance", firstWeekOnly: true }], "2:00 PM": [{ text: "📧 Clean Emails", type: "medium" }, { text: "📁 File Documents", type: "medium" }], "3:00 PM": [{ text: "💳 Pay Bills Weekly", type: "finance" }] },
-            2: { "8:00 AM": [{ text: "📋 Check To-Do File", type: "critical" }, { text: "Daily System Review", type: "critical" }, { text: "🔧 Update Work Orders", type: "maintenance" }], "9:00 AM": [{ text: "Maintenance Dispatch", type: "maintenance" }, { text: "🌱 Water Indoor Plants", type: "maintenance" }], "10:00 AM": [{ text: "Tenant Communication", type: "high" }, { text: "Lease Applications", type: "high" }, { text: "💰 Enter Rents QB (1st)", type: "finance", firstWeekOnly: true }], "2:00 PM": [{ text: "📧 Clean Emails", type: "medium" }, { text: "📁 File Documents", type: "medium" }, { text: "Lease Renewals Review", type: "medium" }] },
-            3: { "8:00 AM": [{ text: "📋 Check To-Do File", type: "critical" }, { text: "Daily System Review", type: "critical" }, { text: "🔧 Update Work Orders", type: "maintenance" }], "9:00 AM": [{ text: "Maintenance Coordination", type: "maintenance" }, { text: "🌿 Water Outside Plants", type: "maintenance" }], "10:00 AM": [{ text: "💰 Enter Rents QB (1st)", type: "finance", firstWeekOnly: true }, { text: "🏢 NREIG Entry (1st Wed)", type: "finance", firstWedOnly: true }, { text: "💳 Credit Card Fees (1st)", type: "finance", firstWedOnly: true }], "2:00 PM": [{ text: "📧 Clean Emails", type: "medium" }, { text: "📁 File Documents", type: "medium" }, { text: "File Management", type: "medium" }] },
-            4: { "8:00 AM": [{ text: "📋 Check To-Do File", type: "critical" }, { text: "Daily Operations Review", type: "critical" }, { text: "🔧 Update Work Orders", type: "maintenance" }], "10:00 AM": [{ text: "Invoice Approval", type: "finance" }, { text: "💰 Enter Rents QB (1st)", type: "finance", firstWeekOnly: true }, { text: "📅 Review Lease Exp (1st)", type: "high", firstWeekOnly: true }], "2:00 PM": [{ text: "📧 Clean Emails", type: "medium" }, { text: "📁 File Documents", type: "medium" }, { text: "🛒 eBay Posts (30min)", type: "medium" }], "3:00 PM": [{ text: "Legal Notices", type: "high" }, { text: "Eviction Review", type: "critical" }] },
-            5: { "8:00 AM": [{ text: "📋 Check To-Do File", type: "critical" }, { text: "Week Final Check", type: "critical" }, { text: "🔧 Update Work Orders", type: "maintenance" }], "9:00 AM": [{ text: "Weekend Maintenance Prep", type: "maintenance" }, { text: "🌿 Water Outside Plants", type: "maintenance" }], "10:00 AM": [{ text: "Weekly Performance Review", type: "high" }, { text: "💰 Enter Rents QB (1st)", type: "finance", firstWeekOnly: true }], "2:00 PM": [{ text: "📧 Clean Emails", type: "medium" }, { text: "📁 File Documents", type: "medium" }, { text: "🧹 Clean Offices", type: "maintenance" }], "3:00 PM": [{ text: "Owner Communications", type: "medium" }, { text: "Weekly Reports", type: "finance" }] }
+            1: { // Monday
+                "8:00 AM": [
+                    { text: "📋 Check To-Do File", type: "critical" },
+                    { text: "Rentec Login & Review", type: "critical" },
+                    { text: "🔧 Update Work Orders", type: "maintenance" }
+                ],
+                "9:00 AM": [
+                    { text: "Maintenance Dispatch", type: "maintenance" },
+                    { text: "Follow-up Work Orders", type: "maintenance" }
+                ],
+                "10:00 AM": [
+                    { text: "Rent Collection Review", type: "finance" },
+                    { text: "💰 Enter Rents QB (1st Week)", type: "finance", firstWeekOnly: true }
+                ],
+                "11:00 AM": [
+                    { text: "📊 Print CNB Statements (1st)", type: "finance", firstWeekOnly: true }
+                ],
+                "2:00 PM": [
+                    { text: "📧 Clean Emails", type: "medium" },
+                    { text: "📁 File Documents", type: "medium" }
+                ]
+            },
+            2: { // Tuesday
+                "8:00 AM": [
+                    { text: "📋 Check To-Do File", type: "critical" },
+                    { text: "🔧 Update Work Orders", type: "maintenance" }
+                ],
+                "9:00 AM": [
+                    { text: "Maintenance Dispatch", type: "maintenance" },
+                    { text: "🌱 Water Indoor Plants", type: "maintenance" }
+                ],
+                "10:00 AM": [
+                    { text: "Tenant Communication", type: "high" },
+                    { text: "Lease Applications", type: "high" },
+                    { text: "💰 Enter Rents QB (1st)", type: "finance", firstWeekOnly: true }
+                ],
+                "2:00 PM": [
+                    { text: "📧 Clean Emails", type: "medium" },
+                    { text: "📁 File Documents", type: "medium" },
+                    { text: "Lease Renewals Review", type: "medium" }
+                ]
+            },
+            3: { // Wednesday - ADDED Pay Bills Weekly
+                "8:00 AM": [
+                    { text: "📋 Check To-Do File", type: "critical" },
+                    { text: "🔧 Update Work Orders", type: "maintenance" }
+                ],
+                "9:00 AM": [
+                    { text: "Maintenance Coordination", type: "maintenance" },
+                    { text: "🌿 Water Outside Plants", type: "maintenance" }
+                ],
+                "10:00 AM": [
+                    { text: "💰 Enter Rents QB (1st)", type: "finance", firstWeekOnly: true },
+                    { text: "🏢 NREIG Entry (1st Wed)", type: "finance", firstWedOnly: true },
+                    { text: "💳 Credit Card Fees (1st)", type: "finance", firstWedOnly: true }
+                ],
+                "2:00 PM": [
+                    { text: "📧 Clean Emails", type: "medium" },
+                    { text: "📁 File Documents", type: "medium" },
+                    { text: "File Management", type: "medium" }
+                ],
+                "3:00 PM": [
+                    { text: "💳 Pay Bills Weekly", type: "finance" }
+                ]
+            },
+            4: { // Thursday - REMOVED eBay
+                "8:00 AM": [
+                    { text: "📋 Check To-Do File", type: "critical" },
+                    { text: "Daily Operations Review", type: "critical" },
+                    { text: "🔧 Update Work Orders", type: "maintenance" }
+                ],
+                "10:00 AM": [
+                    { text: "Invoice Approval", type: "finance" },
+                    { text: "💰 Enter Rents QB (1st)", type: "finance", firstWeekOnly: true },
+                    { text: "📅 Review Lease Exp (1st)", type: "high", firstWeekOnly: true }
+                ],
+                "2:00 PM": [
+                    { text: "📧 Clean Emails", type: "medium" },
+                    { text: "📁 File Documents", type: "medium" }
+                ],
+                "3:00 PM": [
+                    { text: "Legal Notices", type: "high" },
+                    { text: "Eviction Review", type: "critical" }
+                ]
+            },
+            5: { // Friday - REMOVED Weekly Performance Review, ADDED Pay Bills & State Farm
+                "8:00 AM": [
+                    { text: "📋 Check To-Do File", type: "critical" },
+                    { text: "Week Final Check", type: "critical" },
+                    { text: "🔧 Update Work Orders", type: "maintenance" }
+                ],
+                "9:00 AM": [
+                    { text: "Weekend Maintenance Prep", type: "maintenance" },
+                    { text: "🌿 Water Outside Plants", type: "maintenance" }
+                ],
+                "10:00 AM": [
+                    { text: "💰 Enter Rents QB (1st)", type: "finance", firstWeekOnly: true },
+                    { text: "🏥 Schedule State Farm (1st Fri)", type: "finance", firstFridayOnly: true }
+                ],
+                "11:00 AM": [
+                    { text: "Strategic Planning Session", type: "medium" }
+                ],
+                "2:00 PM": [
+                    { text: "📧 Clean Emails", type: "medium" },
+                    { text: "📁 File Documents", type: "medium" },
+                    { text: "🧹 Clean Offices", type: "maintenance" }
+                ],
+                "3:00 PM": [
+                    { text: "💳 Pay Bills Weekly", type: "finance" },
+                    { text: "Owner Communications", type: "medium" },
+                    { text: "Weekly Reports", type: "finance" }
+                ]
+            }
         };
+        
         let currentDate = new Date();
         let taskStates = JSON.parse(localStorage.getItem('alemthanTaskStates') || '{}');
         let currentTaskId = null;
+        
         function generateTaskId(date, text) { return `${date.toISOString().split('T')[0]}_${text.replace(/[^a-zA-Z0-9]/g, '_')}`; }
         function saveTaskStates() { localStorage.setItem('alemthanTaskStates', JSON.stringify(taskStates)); updateStats(); }
         function formatMonthInput(date) { const year = date.getFullYear(); const month = (date.getMonth() + 1).toString().padStart(2, '0'); return `${year}-${month}`; }
         function isToday(date) { const today = new Date(); return date.toDateString() === today.toDateString(); }
         function isFirstWeekOfMonth(date) { return Math.ceil(date.getDate() / 7) === 1; }
         function isFirstWednesday(date) { return date.getDay() === 3 && isFirstWeekOfMonth(date); }
+        function isFirstFriday(date) { return date.getDay() === 5 && isFirstWeekOfMonth(date); }
+        function isSecondTuesday(date) { const weekOfMonth = Math.ceil(date.getDate() / 7); return date.getDay() === 2 && weekOfMonth === 2; }
+        function isThirdThursday(date) { const weekOfMonth = Math.ceil(date.getDate() / 7); return date.getDay() === 4 && weekOfMonth === 3; }
+        function isSecondWeekFebruary(date) { const weekOfMonth = Math.ceil(date.getDate() / 7); return date.getMonth() === 1 && weekOfMonth === 2; }
         function isSameMonth(date1, date2) { return date1.getFullYear() === date2.getFullYear() && date1.getMonth() === date2.getMonth(); }
         function updateMonthDisplay() { document.getElementById('monthDate').value = formatMonthInput(currentDate); document.getElementById('currentMonth').textContent = `${monthNames[currentDate.getMonth()]} ${currentDate.getFullYear()}`; }
         function updateStats() {
@@ -171,6 +287,7 @@
             document.getElementById('statInProgress').textContent = inProgress;
             document.getElementById('statPending').textContent = pending;
         }
+        
         function generateCalendar() {
             const calendar = document.getElementById('calendar');
             calendar.innerHTML = '';
@@ -178,6 +295,7 @@
             const firstDay = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
             const startDate = new Date(firstDay);
             startDate.setDate(startDate.getDate() - firstDay.getDay());
+            
             for (let i = 0; i < 42; i++) {
                 const date = new Date(startDate);
                 date.setDate(startDate.getDate() + i);
@@ -189,31 +307,88 @@
                 dayNumber.className = 'day-number';
                 dayNumber.textContent = date.getDate();
                 dayCell.appendChild(dayNumber);
+                
                 if (isSameMonth(date, currentDate)) {
                     const dayOfWeek = date.getDay();
                     let taskCount = 0;
-                    if (dayOfWeek === 0) { const weekendMsg = document.createElement('div'); weekendMsg.className = 'weekend-message emergency'; weekendMsg.innerHTML = '🚨 EMERGENCY ONLY'; dayCell.appendChild(weekendMsg); }
-                    else if (dayOfWeek === 6) { const weekendMsg = document.createElement('div'); weekendMsg.className = 'weekend-message showings'; weekendMsg.innerHTML = '🏠 SHOWINGS'; dayCell.appendChild(weekendMsg); }
+                    
+                    if (dayOfWeek === 0) { 
+                        const weekendMsg = document.createElement('div'); 
+                        weekendMsg.className = 'weekend-message emergency'; 
+                        weekendMsg.innerHTML = '🚨 EMERGENCY ONLY'; 
+                        dayCell.appendChild(weekendMsg); 
+                    }
+                    else if (dayOfWeek === 6) { 
+                        const weekendMsg = document.createElement('div'); 
+                        weekendMsg.className = 'weekend-message showings'; 
+                        weekendMsg.innerHTML = '🏠 SHOWINGS'; 
+                        dayCell.appendChild(weekendMsg); 
+                    }
                     else {
+                        // 4th of month tasks
                         if (date.getDate() === 4) { 
-                            dayCell.appendChild(createTaskElement(date, { text: '📋 Send Late Notices', type: 'critical' })); taskCount++;
-                            dayCell.appendChild(createTaskElement(date, { text: '💰 Post Late Charges', type: 'finance' })); taskCount++;
+                            dayCell.appendChild(createTaskElement(date, { text: '📋 Send Late Notices', type: 'critical' })); 
+                            taskCount++;
+                            dayCell.appendChild(createTaskElement(date, { text: '💰 Post Late Charges', type: 'finance' })); 
+                            taskCount++;
                         }
-                        const weekOfMonth = Math.ceil(date.getDate() / 7);
-                        if (weekOfMonth === 2 && dayOfWeek === 1) { dayCell.appendChild(createTaskElement(date, { text: '🏦 Pay Loan Payments', type: 'finance' })); taskCount++; }
-                        if (weekOfMonth === 3 && dayOfWeek === 1) { dayCell.appendChild(createTaskElement(date, { text: '🔍 Schedule Inspections', type: 'inspection' })); taskCount++; }
+                        
+                        // Second Tuesday - Pay Loan Payments
+                        if (isSecondTuesday(date)) { 
+                            dayCell.appendChild(createTaskElement(date, { text: '🏦 Pay Loan Payments', type: 'finance' })); 
+                            taskCount++; 
+                        }
+                        
+                        // Third Thursday - Ammons Payout
+                        if (isThirdThursday(date)) { 
+                            dayCell.appendChild(createTaskElement(date, { text: '💼 Ammons Payout (Monthly)', type: 'finance' })); 
+                            taskCount++; 
+                        }
+                        
+                        // Second week of February - Property Tax Statements
+                        if (isSecondWeekFebruary(date) && dayOfWeek === 1) { 
+                            dayCell.appendChild(createTaskElement(date, { text: '📄 Send Property Tax Statements', type: 'critical' })); 
+                            taskCount++; 
+                        }
+                        
+                        // Quarterly tasks (20th of quarter months: March, June, September, December)
                         const month = date.getMonth() + 1;
                         const isQuarterMonth = [3, 6, 9, 12].includes(month);
-                        if (date.getDate() === 20 && isQuarterMonth) { dayCell.appendChild(createTaskElement(date, { text: '💼 Investor Payouts Due 25th', type: 'critical' })); taskCount++; }
+                        if (date.getDate() === 20 && isQuarterMonth) { 
+                            dayCell.appendChild(createTaskElement(date, { text: '💼 Investor Payouts Due 25th', type: 'critical' })); 
+                            taskCount++;
+                            dayCell.appendChild(createTaskElement(date, { text: '📊 Invoice Rents (Quarterly)', type: 'finance' })); 
+                            taskCount++;
+                        }
+                        
+                        // Regular daily tasks
                         const dayTasks = dailyTasks[dayOfWeek] || {};
-                        Object.keys(dayTasks).forEach(time => { dayTasks[time].forEach(task => { let shouldShow = true; if (task.firstWeekOnly && !isFirstWeekOfMonth(date)) shouldShow = false; if (task.firstWedOnly && !isFirstWednesday(date)) shouldShow = false; if (shouldShow) { dayCell.appendChild(createTaskElement(date, task)); taskCount++; } }); });
+                        Object.keys(dayTasks).forEach(time => { 
+                            dayTasks[time].forEach(task => { 
+                                let shouldShow = true; 
+                                if (task.firstWeekOnly && !isFirstWeekOfMonth(date)) shouldShow = false; 
+                                if (task.firstWedOnly && !isFirstWednesday(date)) shouldShow = false; 
+                                if (task.firstFridayOnly && !isFirstFriday(date)) shouldShow = false; 
+                                if (shouldShow) { 
+                                    dayCell.appendChild(createTaskElement(date, task)); 
+                                    taskCount++; 
+                                } 
+                            }); 
+                        });
                     }
-                    if (taskCount > 5) { const countIndicator = document.createElement('div'); countIndicator.className = 'task-count'; countIndicator.textContent = taskCount; dayCell.appendChild(countIndicator); }
+                    
+                    if (taskCount > 5) { 
+                        const countIndicator = document.createElement('div'); 
+                        countIndicator.className = 'task-count'; 
+                        countIndicator.textContent = taskCount; 
+                        dayCell.appendChild(countIndicator); 
+                    }
                 }
                 calendar.appendChild(dayCell);
             }
             updateStats();
         }
+        
         function createTaskElement(date, task) {
             const taskElement = document.createElement('div');
             const taskId = generateTaskId(date, task.text);
@@ -233,12 +408,14 @@
             if (state.note) { taskElement.title = `${task.text}\n\nNote: ${state.note}`; }
             return taskElement;
         }
+        
         function toggleTaskDone(taskId, element) {
             if (!taskStates[taskId]) taskStates[taskId] = { status: 'todo' };
             taskStates[taskId].status = taskStates[taskId].status === 'done' ? 'todo' : 'done';
             saveTaskStates();
             generateCalendar();
         }
+        
         function showContextMenu(e, taskId) {
             currentTaskId = taskId;
             const menu = document.getElementById('contextMenu');
@@ -253,6 +430,7 @@
             else if (currentStatus === 'waiting') items[2].classList.add('active');
             else if (currentStatus === 'done') items[3].classList.add('active');
         }
+        
         function setTaskStatus(status) {
             if (!currentTaskId) return;
             if (!taskStates[currentTaskId]) taskStates[currentTaskId] = {};
@@ -261,12 +439,14 @@
             generateCalendar();
             document.getElementById('contextMenu').style.display = 'none';
         }
+        
         function addTaskNote() {
             document.getElementById('contextMenu').style.display = 'none';
             const note = (taskStates[currentTaskId] || {}).note || '';
             document.getElementById('taskNoteInput').value = note;
             document.getElementById('noteModal').style.display = 'block';
         }
+        
         function saveTaskNote() {
             if (!currentTaskId) return;
             if (!taskStates[currentTaskId]) taskStates[currentTaskId] = { status: 'todo' };
@@ -275,6 +455,7 @@
             generateCalendar();
             closeNoteModal();
         }
+        
         function closeNoteModal() { document.getElementById('noteModal').style.display = 'none'; }
         document.addEventListener('click', () => { document.getElementById('contextMenu').style.display = 'none'; });
         function previousMonth() { currentDate.setMonth(currentDate.getMonth() - 1); updateMonthDisplay(); generateCalendar(); }
