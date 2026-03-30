@@ -1,1 +1,145 @@
-https://github.com/Alemthan/calendar/new/main
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alemthan Property Management Monthly Calendar</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); min-height: 100vh; padding: 15px; }
+        .container { max-width: 1600px; margin: 0 auto; background: white; border-radius: 15px; box-shadow: 0 20px 40px rgba(0,0,0,0.1); overflow: hidden; }
+        .header { background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%); color: white; padding: 25px 30px; text-align: center; }
+        .header h1 { font-size: 2.2em; margin-bottom: 8px; font-weight: 300; }
+        .header p { font-size: 1.1em; opacity: 0.9; }
+        .controls { background: #f8f9fa; padding: 20px 30px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e9ecef; flex-wrap: wrap; gap: 15px; }
+        .month-selector { display: flex; align-items: center; gap: 15px; }
+        .month-selector input { padding: 10px 15px; border: 2px solid #dee2e6; border-radius: 8px; font-size: 14px; }
+        .current-month { font-weight: 700; font-size: 1.5em; color: #495057; }
+        .btn { padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600; transition: all 0.3s ease; }
+        .btn-primary { background: #007bff; color: white; }
+        .btn-primary:hover { background: #0056b3; transform: translateY(-2px); }
+        .btn-success { background: #28a745; color: white; }
+        .btn-success:hover { background: #1e7e34; transform: translateY(-2px); }
+        .calendar-container { background: white; padding: 20px; }
+        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; background: #e9ecef; border: 2px solid #dee2e6; border-radius: 10px; overflow: hidden; }
+        .day-header { background: linear-gradient(135deg, #495057 0%, #6c757d 100%); color: white; padding: 12px; text-align: center; font-weight: 700; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; }
+        .day-cell { background: white; min-height: 140px; padding: 8px; border: 1px solid #e9ecef; overflow-y: auto; position: relative; }
+        .day-cell.other-month { background: #f8f9fa; opacity: 0.6; }
+        .day-cell.today { background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%); border: 2px solid #ffc107; }
+        .day-number { font-weight: bold; font-size: 16px; color: #495057; margin-bottom: 5px; text-align: center; }
+        .day-cell.other-month .day-number { color: #adb5bd; }
+        .task { background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%); border-left: 3px solid #2196f3; padding: 3px 6px; margin: 2px 0; border-radius: 4px; font-size: 9px; line-height: 1.2; cursor: pointer; transition: all 0.2s ease; word-wrap: break-word; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .task:hover { transform: scale(1.05); box-shadow: 0 2px 8px rgba(0,0,0,0.15); white-space: normal; z-index: 10; position: relative; }
+        .task.critical { background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%); border-color: #f44336; font-weight: 700; }
+        .task.high { background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%); border-color: #ff9800; font-weight: 600; }
+        .task.medium { background: linear-gradient(135deg, #f3e5f5 0%, #e1bee7 100%); border-color: #9c27b0; }
+        .task.maintenance { background: linear-gradient(135deg, #e8f5e8 0%, #c8e6c9 100%); border-color: #4caf50; }
+        .task.finance { background: linear-gradient(135deg, #fff8e1 0%, #ffecb3 100%); border-color: #ffc107; }
+        .task.inspection { background: linear-gradient(135deg, #e1f5fe 0%, #b3e5fc 100%); border-color: #03a9f4; }
+        .weekend-message { background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border: 2px solid #6c757d; padding: 8px; margin: 5px 0; border-radius: 6px; text-align: center; font-size: 10px; font-weight: bold; color: #495057; }
+        .weekend-message.emergency { background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%); border-color: #dc3545; color: #721c24; }
+        .weekend-message.showings { background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%); border-color: #ff9800; color: #e65100; }
+        .legend { display: flex; justify-content: center; gap: 15px; padding: 15px; background: #f8f9fa; border-top: 1px solid #e9ecef; flex-wrap: wrap; }
+        .legend-item { display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 600; padding: 6px 12px; background: white; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        .legend-color { width: 12px; height: 12px; border-radius: 3px; border: 2px solid; }
+        .task-count { position: absolute; top: 2px; right: 2px; background: #6c757d; color: white; border-radius: 50%; width: 16px; height: 16px; font-size: 8px; display: flex; align-items: center; justify-content: center; font-weight: bold; }
+        @media (max-width: 1200px) { .task { font-size: 8px; } .day-cell { min-height: 120px; } }
+        @media (max-width: 768px) { .calendar-grid { gap: 1px; } .day-cell { min-height: 100px; padding: 4px; } .task { font-size: 7px; padding: 2px 4px; } .controls { flex-direction: column; align-items: stretch; } }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📋 Alemthan Property Management</h1>
+            <p>Monthly Task Calendar - Full Month View</p>
+        </div>
+        <div class="controls">
+            <div class="month-selector">
+                <label>📅 Month:</label>
+                <input type="month" id="monthDate" />
+                <div class="current-month" id="currentMonth"></div>
+            </div>
+            <div>
+                <button class="btn btn-primary" onclick="previousMonth()">← Previous</button>
+                <button class="btn btn-primary" onclick="nextMonth()">Next →</button>
+                <button class="btn btn-success" onclick="resetToToday()">📍 Today</button>
+            </div>
+        </div>
+        <div class="calendar-container">
+            <div class="calendar-grid" id="calendar"></div>
+        </div>
+        <div class="legend">
+            <div class="legend-item"><div class="legend-color critical" style="background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%); border-color: #f44336;"></div><span>🚨 Critical</span></div>
+            <div class="legend-item"><div class="legend-color high" style="background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%); border-color: #ff9800;"></div><span>⚡ High Priority</span></div>
+            <div class="legend-item"><div class="legend-color maintenance" style="background: linear-gradient(135deg, #e8f5e8 0%, #c8e6c9 100%); border-color: #4caf50;"></div><span>🔧 Maintenance</span></div>
+            <div class="legend-item"><div class="legend-color finance" style="background: linear-gradient(135deg, #fff8e1 0%, #ffecb3 100%); border-color: #ffc107;"></div><span>💰 Finance</span></div>
+            <div class="legend-item"><div class="legend-color inspection" style="background: linear-gradient(135deg, #e1f5fe 0%, #b3e5fc 100%); border-color: #03a9f4;"></div><span>🔍 Inspections</span></div>
+        </div>
+    </div>
+    <script>
+        const dayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+        const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+        const dailyTasks = {
+            1: { "8:00 AM": [{ text: "📋 Check To-Do File", type: "critical" }, { text: "Rentec Login & Review", type: "critical" }, { text: "🔧 Update Work Orders", type: "maintenance" }], "9:00 AM": [{ text: "Maintenance Dispatch", type: "maintenance" }, { text: "Follow-up Work Orders", type: "maintenance" }], "10:00 AM": [{ text: "Rent Collection Review", type: "finance" }, { text: "💰 Enter Rents QB (1st Week)", type: "finance", firstWeekOnly: true }], "11:00 AM": [{ text: "📊 Print CNB Statements (1st)", type: "finance", firstWeekOnly: true }], "2:00 PM": [{ text: "📧 Clean Emails", type: "medium" }, { text: "📁 File Documents", type: "medium" }], "3:00 PM": [{ text: "💳 Pay Bills Weekly", type: "finance" }] },
+            2: { "8:00 AM": [{ text: "📋 Check To-Do File", type: "critical" }, { text: "Daily System Review", type: "critical" }, { text: "🔧 Update Work Orders", type: "maintenance" }], "9:00 AM": [{ text: "Maintenance Dispatch", type: "maintenance" }, { text: "🌱 Water Indoor Plants", type: "maintenance" }], "10:00 AM": [{ text: "Tenant Communication", type: "high" }, { text: "Lease Applications", type: "high" }, { text: "💰 Enter Rents QB (1st)", type: "finance", firstWeekOnly: true }], "2:00 PM": [{ text: "📧 Clean Emails", type: "medium" }, { text: "📁 File Documents", type: "medium" }, { text: "Lease Renewals Review", type: "medium" }] },
+            3: { "8:00 AM": [{ text: "📋 Check To-Do File", type: "critical" }, { text: "Daily System Review", type: "critical" }, { text: "🔧 Update Work Orders", type: "maintenance" }], "9:00 AM": [{ text: "Maintenance Coordination", type: "maintenance" }, { text: "🌿 Water Outside Plants", type: "maintenance" }], "10:00 AM": [{ text: "💰 Enter Rents QB (1st)", type: "finance", firstWeekOnly: true }, { text: "🏢 NREIG Entry (1st Wed)", type: "finance", firstWedOnly: true }, { text: "💳 Credit Card Fees (1st)", type: "finance", firstWedOnly: true }], "2:00 PM": [{ text: "📧 Clean Emails", type: "medium" }, { text: "📁 File Documents", type: "medium" }, { text: "File Management", type: "medium" }] },
+            4: { "8:00 AM": [{ text: "📋 Check To-Do File", type: "critical" }, { text: "Daily Operations Review", type: "critical" }, { text: "🔧 Update Work Orders", type: "maintenance" }], "10:00 AM": [{ text: "Invoice Approval", type: "finance" }, { text: "💰 Enter Rents QB (1st)", type: "finance", firstWeekOnly: true }, { text: "📅 Review Lease Exp (1st)", type: "high", firstWeekOnly: true }], "2:00 PM": [{ text: "📧 Clean Emails", type: "medium" }, { text: "📁 File Documents", type: "medium" }, { text: "🛒 eBay Posts (30min)", type: "medium" }], "3:00 PM": [{ text: "Legal Notices", type: "high" }, { text: "Eviction Review", type: "critical" }] },
+            5: { "8:00 AM": [{ text: "📋 Check To-Do File", type: "critical" }, { text: "Week Final Check", type: "critical" }, { text: "🔧 Update Work Orders", type: "maintenance" }], "9:00 AM": [{ text: "Weekend Maintenance Prep", type: "maintenance" }, { text: "🌿 Water Outside Plants", type: "maintenance" }], "10:00 AM": [{ text: "Weekly Performance Review", type: "high" }, { text: "💰 Enter Rents QB (1st)", type: "finance", firstWeekOnly: true }], "2:00 PM": [{ text: "📧 Clean Emails", type: "medium" }, { text: "📁 File Documents", type: "medium" }, { text: "🧹 Clean Offices", type: "maintenance" }], "3:00 PM": [{ text: "Owner Communications", type: "medium" }, { text: "Weekly Reports", type: "finance" }] }
+        };
+        let currentDate = new Date();
+        function formatMonthInput(date) { const year = date.getFullYear(); const month = (date.getMonth() + 1).toString().padStart(2, '0'); return `${year}-${month}`; }
+        function isToday(date) { const today = new Date(); return date.toDateString() === today.toDateString(); }
+        function isFirstWeekOfMonth(date) { return Math.ceil(date.getDate() / 7) === 1; }
+        function isFirstWednesday(date) { return date.getDay() === 3 && isFirstWeekOfMonth(date); }
+        function isSameMonth(date1, date2) { return date1.getFullYear() === date2.getFullYear() && date1.getMonth() === date2.getMonth(); }
+        function updateMonthDisplay() { document.getElementById('monthDate').value = formatMonthInput(currentDate); document.getElementById('currentMonth').textContent = `${monthNames[currentDate.getMonth()]} ${currentDate.getFullYear()}`; }
+        function generateCalendar() {
+            const calendar = document.getElementById('calendar');
+            calendar.innerHTML = '';
+            dayNames.forEach(day => { const dayHeader = document.createElement('div'); dayHeader.className = 'day-header'; dayHeader.textContent = day; calendar.appendChild(dayHeader); });
+            const firstDay = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
+            const lastDay = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
+            const startDate = new Date(firstDay);
+            startDate.setDate(startDate.getDate() - firstDay.getDay());
+            for (let i = 0; i < 42; i++) {
+                const date = new Date(startDate);
+                date.setDate(startDate.getDate() + i);
+                const dayCell = document.createElement('div');
+                dayCell.className = 'day-cell';
+                if (!isSameMonth(date, currentDate)) { dayCell.classList.add('other-month'); }
+                if (isToday(date)) { dayCell.classList.add('today'); }
+                const dayNumber = document.createElement('div');
+                dayNumber.className = 'day-number';
+                dayNumber.textContent = date.getDate();
+                dayCell.appendChild(dayNumber);
+                if (isSameMonth(date, currentDate)) {
+                    const dayOfWeek = date.getDay();
+                    let taskCount = 0;
+                    if (dayOfWeek === 0) { const weekendMsg = document.createElement('div'); weekendMsg.className = 'weekend-message emergency'; weekendMsg.innerHTML = '🚨 EMERGENCY ONLY'; dayCell.appendChild(weekendMsg); }
+                    else if (dayOfWeek === 6) { const weekendMsg = document.createElement('div'); weekendMsg.className = 'weekend-message showings'; weekendMsg.innerHTML = '🏠 SHOWINGS'; dayCell.appendChild(weekendMsg); }
+                    else {
+                        if (date.getDate() === 4) { const lateNotice = document.createElement('div'); lateNotice.className = 'task critical'; lateNotice.textContent = '📋 Send Late Notices'; lateNotice.title = 'Send Late Notices (4th of month)'; dayCell.appendChild(lateNotice); taskCount++; const lateCharges = document.createElement('div'); lateCharges.className = 'task finance'; lateCharges.textContent = '💰 Post Late Charges'; lateCharges.title = 'Post Late Charges (4th of month)'; dayCell.appendChild(lateCharges); taskCount++; }
+                        const weekOfMonth = Math.ceil(date.getDate() / 7);
+                        if (weekOfMonth === 2 && dayOfWeek === 1) { const loanPayments = document.createElement('div'); loanPayments.className = 'task finance'; loanPayments.textContent = '🏦 Pay Loan Payments'; loanPayments.title = 'Pay All Loan Payments (Second week)'; dayCell.appendChild(loanPayments); taskCount++; }
+                        if (weekOfMonth === 3 && dayOfWeek === 1) { const inspections = document.createElement('div'); inspections.className = 'task inspection'; inspections.textContent = '🔍 Schedule Inspections'; inspections.title = 'Schedule Bi-Annual Inspections (Third week)'; dayCell.appendChild(inspections); taskCount++; }
+                        const month = date.getMonth() + 1;
+                        const isQuarterMonth = [3, 6, 9, 12].includes(month);
+                        if (date.getDate() === 20 && isQuarterMonth) { const payouts = document.createElement('div'); payouts.className = 'task critical'; payouts.textContent = '💼 Investor Payouts Due 25th'; payouts.title = 'Complete Investor Payouts by 25th (Quarterly)'; dayCell.appendChild(payouts); taskCount++; }
+                        const dayTasks = dailyTasks[dayOfWeek] || {};
+                        Object.keys(dayTasks).forEach(time => { dayTasks[time].forEach(task => { let shouldShow = true; if (task.firstWeekOnly && !isFirstWeekOfMonth(date)) { shouldShow = false; } if (task.firstWedOnly && !isFirstWednesday(date)) { shouldShow = false; } if (shouldShow) { const taskElement = document.createElement('div'); taskElement.className = `task ${task.type}`; taskElement.textContent = task.text; taskElement.title = `${time}: ${task.text}`; dayCell.appendChild(taskElement); taskCount++; } }); });
+                    }
+                    if (taskCount > 5) { const countIndicator = document.createElement('div'); countIndicator.className = 'task-count'; countIndicator.textContent = taskCount; countIndicator.title = `${taskCount} tasks today`; dayCell.appendChild(countIndicator); }
+                }
+                calendar.appendChild(dayCell);
+            }
+        }
+        function previousMonth() { currentDate.setMonth(currentDate.getMonth() - 1); updateMonthDisplay(); generateCalendar(); }
+        function nextMonth() { currentDate.setMonth(currentDate.getMonth() + 1); updateMonthDisplay(); generateCalendar(); }
+        function resetToToday() { currentDate = new Date(); updateMonthDisplay(); generateCalendar(); }
+        document.getElementById('monthDate').addEventListener('change', function(e) { const [year, month] = e.target.value.split('-'); currentDate = new Date(parseInt(year), parseInt(month) - 1, 1); updateMonthDisplay(); generateCalendar(); });
+        updateMonthDisplay();
+        generateCalendar();
+        console.log('📅 Alemthan Property Management Monthly Calendar Loaded Successfully!');
+    </script>
+</body>
+</html>
